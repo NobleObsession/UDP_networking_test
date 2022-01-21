@@ -4,8 +4,10 @@
 #include "UDP_client.h"
 
 TEST(Initial_test, BasicAssertions) {
-    UDP_server server;
+
+    auto server = std::make_shared<UDP_server>();
+    server->start_receive();
+
     UDP_client client;
-    server.start_receive();
-    client.send();
+    client.run();
 }

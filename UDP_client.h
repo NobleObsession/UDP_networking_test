@@ -8,16 +8,12 @@ using boost::asio::ip::udp;
 class UDP_client{
 public:
     UDP_client();
-    void send();
+    void run();
 private:
-    void handler(
-            const boost::system::error_code& error,
-            std::size_t bytes_transferred
-          );
+    void send_message();
     boost::asio::io_context ioc_;
-    udp::resolver resolver_;
-    udp::endpoint remote_endpoint_;
     udp::socket socket_;
+    int num_messages_;
 };
 
 #endif // UDP_CLIENT_H

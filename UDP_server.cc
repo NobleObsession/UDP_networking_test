@@ -1,30 +1,42 @@
 #include "UDP_server.h"
 #include <iostream>
+#include <sstream>
 #include <boost/bind/bind.hpp>
+#include <chrono>
 
-UDP_server::UDP_server(): socket_(ioc_), remote_endpoint_(udp::v4(), 55514){};
+thread_local int local_thread_number = 0;
+int local_thread_counter = 0;
+std::atomic<int> packet_counter = 0;
+
+UDP_server::UDP_server(): remote_endpoint_(udp::v4(), 55514), socket_(ioc_, remote_endpoint_), io_pool_(10){};
 
 void UDP_server::start_receive(){
-     boost::asio::ip::udp::endpoint client;
-     boost::array<char, 3> recv_buffer_;
      socket_.async_receive_from(
-             boost::asio::buffer(recv_buffer_), remote_endpoint_,
-             boost::bind(&UDP_server::handle_receive, this,
+             boost::asio::buffer(data_), remote_endpoint_,
+             boost::bind(&UDP_server::handle_receive, shared_from_this(),
                boost::asio::placeholders::error,
                boost::asio::placeholders::bytes_transferred));
-     ioc_.run();
+     boost::asio::post(io_pool_, [&]() {
+         local_thread_counter++; local_thread_number = local_thread_counter; ioc_.run(); });
   };
 
 void UDP_server::handle_receive(const boost::system::error_code& error,
-      std::size_t bytes_transferred/*bytes_transferred*/)
-  {
-    std::cout << "handle_receive" << '\n';
-    if (!error){
-      std::cout << bytes_transferred << std::endl;
-      start_receive();
+      std::size_t){
+    using namespace std::chrono_literals;
+    if(error){
+      std::string str_err = "ErrorListen: " + error.message();
+      std::cerr << str_err << std::endl;
+      return;
+    }
 
-    }else{
-    std::string str_err = "ErrorListen: " + error.message();
-    std::cout << str_err << std::endl;
-}
+    std::thread::id thread_id = std::this_thread::get_id();
+    int packet_id = ++packet_counter;
+    std::stringstream ss;
+    ss << std::string(data_) <<' ' << std::hex << thread_id << ' '
+       << std::dec << local_thread_number << ' ' << packet_id << '\n';
+    std::cout << ss.str() << std::endl;
+    int latency = rand() % 100;
+    std::this_thread::sleep_for(std::chrono::milliseconds(latency));
+
+    start_receive();
   };

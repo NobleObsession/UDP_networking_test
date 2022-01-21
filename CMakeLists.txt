@@ -21,7 +21,7 @@ FIND_PACKAGE(Boost 1.71.0 REQUIRED COMPONENTS system thread regex)
 
 include_directories(${Boost_INCLUDE_DIR})
 
-add_executable(UDP_networking_test main.cpp)
+add_executable(UDP_networking_test main.cpp UDP_server.cc UDP_client.cc)
 
 target_link_libraries(UDP_networking_test ${Boost_LIBRARIES})
 
