@@ -1,13 +1,11 @@
-#include <iostream>
 #include <boost/asio.hpp>
 #include "UDP_server.h"
-#include "UDP_client.h"
 
-using namespace std;
-
-int main()
-{
-    auto server = std::make_shared<UDP_server>();
-    server->start_receive();
+int main(){
+    int num_threads = 10;
+    int port = 55514;
+    boost::asio::io_context io_context;
+    UDP_server server(io_context, port, num_threads);
+    io_context.run();
     return 0;
 }
