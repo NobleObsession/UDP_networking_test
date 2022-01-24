@@ -6,13 +6,39 @@
 
 extern thread_local int local_thread_number;
 
-PacketPrinter::PacketPrinter(){
+PacketPrinter::PacketPrinter():prev_processed_id_(-1), done_(false){
+    output_thread_= std::thread([this](){OutputThread();});
     output_file_.open("processed_packets.txt");
 };
 
-void PacketPrinter::PrintPacket(int packet_id, std::string message){
-    output_file_ << packet_id << ' ' << message << std::endl;
+PacketPrinter::~PacketPrinter(){
+    if(output_thread_.joinable()){
+       output_thread_.join();
+    }
+    done_ = false;
+    output_file_.close();
 };
+
+void PacketPrinter::OutputThread(){
+    while(!done_){
+       std::pair<int, std::string> top_element;
+       if(!packet_queue_.Top(top_element)){
+         std::this_thread::yield();
+         continue;
+       }
+       if(1 == top_element.first - prev_processed_id_){
+         packet_queue_.Pop();
+         prev_processed_id_ = top_element.first;
+         output_file_ << top_element.second;
+       }else{
+         std::this_thread::yield();
+       }
+    }
+};
+
+void PacketPrinter::PushPacket(int packet_id, std::string message){
+    packet_queue_.Push(std::make_pair(packet_id, message));
+}
 
 UDP_server::UDP_server(boost::asio::io_context& io_context, int port, int num_threads)
     : remote_endpoint_(udp::v4(), port),
@@ -34,9 +60,9 @@ void UDP_server::ProcessPacket(int packet_id, std::string received_packet){
     ss << received_packet << ' ' <<
                  thread_id << ' ' << local_thread_number << '\n';
     std::string processed_msg = ss.str();
-    int latency = rand() % 100;
+    int latency = rand() % 200;
     std::this_thread::sleep_for(std::chrono::milliseconds(latency));
-    printer_.PrintPacket(packet_id, processed_msg);
+    printer_.PushPacket(packet_id, processed_msg);
 };
 
 void UDP_server::HandleReceive(const boost::system::error_code& error,
@@ -46,8 +72,8 @@ void UDP_server::HandleReceive(const boost::system::error_code& error,
       std::cerr << str_err << std::endl;
       return;
     }
-    ++packet_counter_;
     int packet_id = packet_counter_;
+    ++packet_counter_;
     std::string received_packet = std::string(data_);
     thread_pool_.Submit([received_packet, packet_id, this]{ProcessPacket(packet_id, received_packet);});
     StartReceive();

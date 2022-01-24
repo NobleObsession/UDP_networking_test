@@ -42,6 +42,36 @@ private:
     std::condition_variable condvar_;
 };
 
+template<typename T>
+class ThreadsafePriorityQueue{
+public:
+    ThreadsafePriorityQueue(){}
+    void Push(T new_value){
+        std::lock_guard<std::mutex>lock(mutex_);
+        queue_.push(new_value);
+        condvar_.notify_one();
+    };
+
+    bool Top(T& value){
+        std::lock_guard<std::mutex>lock(mutex_);
+        if(queue_.empty()){
+            return false;
+        }
+        value = queue_.top();
+        return true;
+    };
+
+    void Pop(){
+        std::lock_guard<std::mutex>lock(mutex_);
+        queue_.pop();
+    };
+
+private:
+    mutable std::mutex mutex_;
+    std::priority_queue<T, std::vector<T>, std::greater<T>> queue_;
+    std::condition_variable condvar_;
+};
+
 class ThreadPool{
 public:
     ThreadPool(int num_threads);

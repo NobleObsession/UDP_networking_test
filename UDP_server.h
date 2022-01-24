@@ -12,10 +12,16 @@ using boost::asio::ip::udp;
 class PacketPrinter{
 public:
     PacketPrinter();
-    void PrintPacket(int packet_id, std::string message);
+    ~PacketPrinter();
+    void PushPacket(int packet_id, std::string message);
+    void OutputThread();
 private:
     std::ofstream output_file_;
-    int prev_processed_id_ = 0;
+    int prev_processed_id_;
+    std::atomic<bool> done_;
+    std::thread output_thread_;
+    ThreadsafePriorityQueue<std::pair<int, std::string>> packet_queue_;
+
 };
 
 class UDP_server{
