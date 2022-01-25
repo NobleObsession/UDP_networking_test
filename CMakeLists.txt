@@ -13,6 +13,7 @@ add_executable(UDP_networking_test main.cpp UDP_server.cc thread_util.cc)
 
 target_link_libraries(UDP_networking_test ${CONAN_LIBS})
 
-file(COPY ${CMAKE_SOURCE_DIR}/test_client.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${CMAKE_SOURCE_DIR}/test_output.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/test_client.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin)
+file(COPY ${CMAKE_SOURCE_DIR}/test_output.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin)
+
 
