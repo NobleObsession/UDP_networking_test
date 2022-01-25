@@ -20,8 +20,7 @@
  1. Run server (in one terminal):  
  ` cd build/bin `  
  ` ./UDP_networking_test `
- 2. Run python test client (in another terminal):  
- ` cd build `  
+ 2. Run python test client (in another terminal):   
  ` python test_client.py `
  3. Then you can find output file:  
  ` build/bin/processed_packets.txt `
@@ -30,11 +29,9 @@
  1. Run server (in one terminal) with optional argument `test`:  
  ` cd build/bin `  
  ` ./UDP_networking_test test`
- 2. Run python test client (in another terminal):  
- ` cd build/bin/ `  
+ 2. Run python test client (in another terminal):   
  ` python test_client.py `
- 3. Run script to check output correctness:  
- ` cd build/bin/ `  
+ 3. Run script to check output correctness:   
  ` python test_output.py `
  
  
