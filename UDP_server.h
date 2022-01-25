@@ -13,7 +13,7 @@ class PacketPrinter{
 public:
     PacketPrinter();
     ~PacketPrinter();
-    void PushPacket(int packet_id, std::string message);
+    void PushPacket(const int packet_id, const std::string& message);
     void OutputThread();
 private:
     std::ofstream output_file_;
@@ -26,12 +26,13 @@ private:
 
 class UDP_server{
 public:
-  UDP_server(boost::asio::io_context& io_context, int port, int num_threads);
+  UDP_server(boost::asio::io_context& io_context, int port,
+             int num_threads, bool test_mode);
 private:
   void StartReceive();
   void HandleReceive(const boost::system::error_code& error,
-        std::size_t bytes_transferred);
-  void ProcessPacket(int packet_id, std::string received_packet);
+        std::size_t);
+  void ProcessPacket(const int packet_id, const std::string& received_packet);
 
   udp::endpoint remote_endpoint_;
   udp::socket socket_;
@@ -39,6 +40,7 @@ private:
   PacketPrinter printer_;
   ThreadPool thread_pool_;
   int packet_counter_;
+  bool test_mode_;
 };
 
 #endif // UDP_SERVER_H

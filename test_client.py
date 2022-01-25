@@ -16,3 +16,4 @@ for i in range(msg_counter):
 	bytesToSend = str.encode(msgFromClient)
 	UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 	sleep(0.02)
+

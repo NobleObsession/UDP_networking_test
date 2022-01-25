@@ -1,20 +1,18 @@
 cmake_minimum_required(VERSION 3.17)
-include(FetchContent)
-
 project(UDP_networking_test LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_COMPILER "gcc-10")
+set(CMAKE_CXX_COMPILER "g++-10")
 
-set(BOOST_ROOT /usr/include/boost)
-set(Boost_USE_STATIC_LIBS OFF)
-SET(Boost_USE_MULTITHREAD ON)
-
-find_package(Boost REQUIRED COMPONENTS system thread)
-
-include_directories(${Boost_INCLUDE_DIR})
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
 
 add_executable(UDP_networking_test main.cpp UDP_server.cc thread_util.cc)
 
-target_link_libraries(UDP_networking_test ${Boost_LIBRARIES})
+target_link_libraries(UDP_networking_test ${CONAN_LIBS})
+
+file(COPY ${CMAKE_SOURCE_DIR}/test_client.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/test_output.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 

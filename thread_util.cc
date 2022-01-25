@@ -19,13 +19,15 @@ ThreadPool::ThreadPool(int num_threads):done_(false), joiner_(threads_){
                 local_thread_number = i;
                 WorkerThread();}));
         }
-    }
+    };
+
 ThreadPool::~ThreadPool(){
         done_ = false;
-    }
+    };
+
 void ThreadPool::Submit(std::function<void()> func){
         work_queue_.Push(func);
-    }
+    };
 
 void ThreadPool::WorkerThread(){
         while(!done_){
